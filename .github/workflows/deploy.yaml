@@ -1,0 +1,43 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Run unit tests
+        run: |
+          pytest tests/
+      
+      - name: Check security
+        run: |
+          pip install bandit
+          bandit -r . > bandit_report.txt
+          cat bandit_report.txt
+      
+      - name: Generate changelog
+        run: |
+          chmod +x generate_changelog.sh
+          ./generate_changelog.sh
+      
+      - name: Publish changelog to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./ # укажите директорию, где находится changelog.md
