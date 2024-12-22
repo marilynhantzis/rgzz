@@ -1,30 +1,21 @@
 #!/bin/bash
 
-# Проверка наличия последнего тега
+# Получаем последний тег
 last_tag=$(git describe --tags --abbrev=0)
-if [ -z "$last_tag" ]; then
-  echo "Нет тегов в репозитории."
-  exit 1
-fi
 
-# Получение всех коммитов с момента последнего релиза
-commits=$(git log "$last_tag"..HEAD --pretty=format:"%h %s")
+# Получаем дату для записи в changelog
+current_date=$(date +%Y-%m-%d)
 
-# Установка версии и даты
-version="v$(date +%Y.%m.%d)"
-date=$(date +%Y-%m-%d)
+# Получаем список коммитов с момента последнего тега
+commits=$(git log $last_tag..HEAD --pretty=format:"%h - %s")
 
-# Форматирование новой секции changelog
-changelog_section="## [$version] - $date\n"
+# Определяем версию
+version="v$(date +%Y.%m.%d)"  # Формат версии: ГГГГ.ММ.ДД
 
-# Добавление коммитов в секцию
-while IFS= read -r commit; do
-  sha=$(echo "$commit" | awk '{print $1}')
-  message=$(echo "$commit" | cut -d ' ' -f2-)
-  changelog_section+=" - $message [$sha](https://github.com/USERNAME/REPOSITORY/commit/$sha)\n"
-done <<< "$commits"
+# Создаем новый раздел в changelog
+echo "## [$version] - $current_date" >> changelog.md
 
-# Добавление новой секции в changelog.md
-echo -e "$changelog_section" >> changelog.md
-
-echo "Changelog обновлен." #
+# Добавляем коммиты в changelog
+echo "$commits" | while IFS= read -r commit; do
+    echo "- $commit [$(echo $commit | awk '{print $1}')] (https://github.com/username/repo/commit/$(echo $commit | awk '{print $1}'))" >> changelog.md
+done

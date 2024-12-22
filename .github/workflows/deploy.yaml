@@ -1,45 +1,43 @@
-   name: CI
+name: CI/CD
 
-   on:
-     push:
-       branches:
-         - main
+on:
+  push:
+    branches:
+      - main
 
-   jobs:
-     test:
-       runs-on: ubuntu-latest
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка кода
+        uses: actions/checkout@v2
 
-       steps:
-         - name: Checkout code
-           uses: actions/checkout@v2
+      - name: Запуск unit-тестов
+        run: |
+          pytest  # Запустите ваши тесты
 
-         - name: Fetch tags
-           run: git fetch --tags
+      - name: Проверка безопасности кода
+        run: |
+          pip install bandit
+          bandit -r .  # Запустите проверку безопасности
 
-         - name: Set up Python
-           uses: actions/setup-python@v2
-           with:
-             python-version: '3.8' #
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка кода
+        uses: actions/checkout@v2
 
-         - name: Run unit tests
-           run: |
-             python -m unittest discover
+      - name: Генерация changelog
+        run: |
+          bash generate_changelog.sh   # Убедитесь, что скрипт имеет права на выполнение
 
-         - name: Check security with Bandit
-           run: |
-             pip install bandit
-             bandit -r .
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Проверка кода
+        uses: actions/checkout@v2
 
-         - name: Generate changelog
-           run: |
-             chmod +x ./generate_changelog.sh
-             ./generate_changelog.sh
-
-         - name: Publish changelog to GitHub Pages
-           run: |
-             git add changelog.md
-             git commit -m "Update changelog"
-             git push origin gh-pages
-           env:
-             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-   
+      - name: Публикация на GitHub Pages
+        run: |
+          git add changelog.md
+          git commit -m "Обновление changelog"
