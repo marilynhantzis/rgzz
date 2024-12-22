@@ -17,10 +17,6 @@ jobs:
         with:
           python-version: '3.8'
       
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-      
       - name: Run unit tests
         run: |
           pytest tests/
@@ -40,4 +36,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./ # укажите директорию, где находится changelog.md
+          publish_dir: ./ 
