@@ -27,4 +27,4 @@ done <<< "$commits"
 # Добавление новой секции в changelog.md
 echo -e "$changelog_section" >> changelog.md
 
-echo "Changelog обновлен."
+echo "Changelog обновлен." #
