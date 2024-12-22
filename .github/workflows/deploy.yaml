@@ -1,43 +1,49 @@
-name: CI
+   name: CI
 
-on:
-  push:
-    branches:
-      - main
+   on:
+     push:
+       branches:
+         - main
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+   jobs:
+     test:
+       runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+       steps:
+         - name: Checkout code
+           uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
+         - name: Fetch tags
+           run: git fetch --tags
 
-      - name: Run unit tests
-        run: |
-          python -m unittest discover
+         - name: Set up Python
+           uses: actions/setup-python@v2
+           with:
+             python-version: '3.8'
 
-      - name: Check security with Bandit
-        run: |
-          pip install bandit
-          bandit -r .
+         - name: Install dependencies
+           run: |
+             pip install -r requirements.txt
 
-      - name: Generate changelog
-        run: |
-          chmod +x ./generate_changelog.sh
-          ./generate_changelog.sh
+         - name: Run unit tests
+           run: |
+             python -m unittest discover
 
-      - name: Publish changelog to GitHub Pages
-        run: |
-          git config --local user.email "you@example.com"
-          git config --local user.name "Your Name"
-          git add changelog.md
-          git commit -m "Update changelog"
-          git push origin gh-pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         - name: Check security with Bandit
+           run: |
+             pip install bandit
+             bandit -r .
+
+         - name: Generate changelog
+           run: |
+             chmod +x ./generate_changelog.sh
+             ./generate_changelog.sh
+
+         - name: Publish changelog to GitHub Pages
+           run: |
+             git add changelog.md
+             git commit -m "Update changelog"
+             git push origin gh-pages
+           env:
+             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+   
