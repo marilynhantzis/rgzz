@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI
 
 on:
   push:
@@ -8,29 +8,40 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out the code
+      - name: Checkout code
         uses: actions/checkout@v2
-      
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8' 
-      
-      - name: Check security
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: |
+          python -m unittest discover
+
+      - name: Check security with Bandit
         run: |
           pip install bandit
-          bandit -r . > bandit_report.txt
-          cat bandit_report.txt
-      
+          bandit -r .
+
       - name: Generate changelog
         run: |
-          chmod +x generate_changelog.sh
+          chmod +x ./generate_changelog.sh
           ./generate_changelog.sh
-      
-      - name: Publish changelog to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
 
+      - name: Publish changelog to GitHub Pages
+        run: |
+          git config --local user.email "you@example.com"
+          git config --local user.name "Your Name"
+          git add changelog.md
+          git commit -m "Update changelog"
+          git push origin gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

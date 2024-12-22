@@ -1,11 +1,30 @@
 #!/bin/bash
 
-LAST_TAG=$(git describe --tags --abbrev=0)
+# Проверка наличия последнего тега
+last_tag=$(git describe --tags --abbrev=0)
+if [ -z "$last_tag" ]; then
+  echo "Нет тегов в репозитории."
+  exit 1
+fi
 
-COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"* %s [%h](https://github.com/marilynhantzis/rgzz/commit/%H)")
+# Получение всех коммитов с момента последнего релиза
+commits=$(git log "$last_tag"..HEAD --pretty=format:"%h %s")
 
-CURRENT_DATE=$(date +%Y-%m-%d)
+# Установка версии и даты
+version="v$(date +%Y.%m.%d)"
+date=$(date +%Y-%m-%d)
 
-VERSION="v$(grep -oP 'version=\K\d+\.\d+\.\d+' app.py)"  #
+# Форматирование новой секции changelog
+changelog_section="## [$version] - $date\n"
 
-echo -e "## $VERSION - $CURRENT_DATE\n$COMMITS\n" >> changelog.md
+# Добавление коммитов в секцию
+while IFS= read -r commit; do
+  sha=$(echo "$commit" | awk '{print $1}')
+  message=$(echo "$commit" | cut -d ' ' -f2-)
+  changelog_section+=" - $message [$sha](https://github.com/USERNAME/REPOSITORY/commit/$sha)\n"
+done <<< "$commits"
+
+# Добавление новой секции в changelog.md
+echo -e "$changelog_section" >> changelog.md
+
+echo "Changelog обновлен."
