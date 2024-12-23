@@ -9,35 +9,27 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Проверка кода
+      - name: Check out the code
         uses: actions/checkout@v2
-
-      - name: Запуск unit-тестов
-        run: |
-          pytest  # Запустите ваши тесты
-
-      - name: Проверка безопасности кода
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8' 
+      
+      - name: Check security
         run: |
           pip install bandit
-          bandit -r .  # Запустите проверку безопасности
-
-  changelog:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Проверка кода
-        uses: actions/checkout@v2
-
-      - name: Генерация changelog
+          bandit -r . > bandit_report.txt
+          cat bandit_report.txt
+      
+      - name: Generate changelog
         run: |
-          bash generate_changelog.sh   # Убедитесь, что скрипт имеет права на выполнение
-
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Проверка кода
-        uses: actions/checkout@v2
-
-      - name: Публикация на GitHub Pages
-        run: |
-          git add changelog.md
-          git commit -m "Обновление changelog"
+          chmod +x generate_changelog.sh
+          ./generate_changelog.sh
+      
+      - name: Publish changelog to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
