@@ -1,11 +1,21 @@
 #!/bin/bash
 
-LAST_TAG=$(git describe --tags --abbrev=0)
+# Получаем последний тег
+last_tag=$(git describe --tags --abbrev=0)
 
-COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"* %s [%h](https://github.com/marilynhantzis/rgzz/commit/%H)")
+# Получаем дату для записи в changelog
+current_date=$(date +%Y-%m-%d)
 
-CURRENT_DATE=$(date +%Y-%m-%d)
+# Получаем список коммитов с момента последнего тега
+commits=$(git log $last_tag..HEAD --pretty=format:"%h - %s")
 
-VERSION="v$(grep -oP 'version=\K\d+\.\d+\.\d+' app.py)"  #
+# Определяем версию
+version="v$(date +%Y.%m.%d)"  # Формат версии: ГГГГ.ММ.ДД
 
-echo -e "## $VERSION - $CURRENT_DATE\n$COMMITS\n" >> changelog.md
+# Создаем новый раздел в changelog
+echo "## [$version] - $current_date" >> changelog.md
+
+# Добавляем коммиты в changelog
+echo "$commits" | while IFS= read -r commit; do
+    echo "- $commit [$(echo $commit | awk '{print $1}')] (https://github.com/marilynhantzis/rgzz/commit/$(echo $commit | awk '{print $1}'))" >> changelog.md
+done
