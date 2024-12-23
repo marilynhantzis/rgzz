@@ -17,5 +17,5 @@ echo "## [$version] - $current_date" >> changelog.md
 
 # Добавляем коммиты в changelog
 echo "$commits" | while IFS= read -r commit; do
-    echo "- $commit [$(echo $commit | awk '{print $1}')] (https://github.com/username/repo/commit/$(echo $commit | awk '{print $1}'))" >> changelog.md
+    echo "- $commit [$(echo $commit | awk '{print $1}')] (https://github.com/marilynhantzis/rgzz/commit/$(echo $commit | awk '{print $1}'))" >> changelog.md
 done
