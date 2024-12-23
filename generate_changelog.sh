@@ -10,7 +10,7 @@ current_date=$(date +%Y-%m-%d)
 commits=$(git log $last_tag..HEAD --pretty=format:"%h - %s")
 
 # Определяем версию
-version="v$(date +%Y.%m.%d)"  # Формат версии: ГГГГ.ММ.ДД
+version="v$(date +%Y.%m.%d)"  # Формат версии: ГГГГ.ММ.Д
 
 # Создаем новый раздел в changelog
 echo "## [$version] - $current_date" >> changelog.md
